@@ -87,6 +87,7 @@ def test_pickle():
 
 
 def test_success(real_data):
+    LayupOrbitFitter.bootstrap()
     observations = real_data
     fitter = LayupOrbitFitter()
     object_id = "2009 JY22"
@@ -107,6 +108,7 @@ def test_success(real_data):
 
 
 def test_not_enough_data(real_data):
+    LayupOrbitFitter.bootstrap()
     observations = real_data[:2]
     fitter = LayupOrbitFitter()
     object_id = "2009 JY22"

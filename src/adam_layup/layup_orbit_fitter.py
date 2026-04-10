@@ -1,4 +1,5 @@
 import logging
+import sys
 from typing import Tuple
 
 import numpy as np
@@ -12,8 +13,8 @@ from adam_core.orbit_determination.evaluate import (
 )
 from adam_core.orbit_determination.orbit_fitter import OrbitFitter
 from adam_core.time import Timestamp
-
 from layup.orbitfit import orbitfit
+from layup_cmdline import bootstrap
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +45,19 @@ class LayupOrbitFitter(OrbitFitter):
 
     def __setstate__(self, state):
         self.__dict__.update(state)
+
+    @classmethod
+    def bootstrap(cls):
+        """Call Layup's bootstrap to download required files.
+
+        This may take a while the first time it's called, but exits very quickly if
+        the cache is already initialized.
+        The bootstrap method parses command line arguments, so we bypass them all here.
+        """
+        original_args = sys.argv
+        sys.argv = sys.argv[:1]
+        bootstrap.main()
+        sys.argv = original_args
 
     def initial_fit(
         self,
