@@ -4,7 +4,6 @@ from typing import Tuple
 
 import numpy as np
 import pyarrow as pa
-import quivr as qv
 from adam_core.coordinates import CartesianCoordinates, CoordinateCovariances, Origin
 from adam_core.orbit_determination.evaluate import (
     FittedOrbitMembers,
@@ -17,16 +16,6 @@ from layup.orbitfit import orbitfit
 from layup_cmdline import bootstrap
 
 logger = logging.getLogger(__name__)
-
-
-class LayupInput(qv.Table):
-    """Internal class to facilitate writing CSV table for inputs."""
-
-    id = qv.LargeStringColumn()
-    ra = qv.Float64Column()
-    dec = qv.Float64Column()
-    stn = qv.LargeStringColumn()
-    obsTime = qv.LargeStringColumn()
 
 
 class LayupOrbitFitter(OrbitFitter):
