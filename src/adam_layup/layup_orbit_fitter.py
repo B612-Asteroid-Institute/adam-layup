@@ -5,6 +5,7 @@ from typing import Tuple
 import numpy as np
 import pyarrow as pa
 from adam_core.coordinates import CartesianCoordinates, CoordinateCovariances, Origin
+from adam_core.coordinates.transform import cartesian_to_frame
 from adam_core.orbit_determination.evaluate import (
     FittedOrbitMembers,
     FittedOrbits,
@@ -101,6 +102,16 @@ class LayupOrbitFitter(OrbitFitter):
         assert (
             len(fitted_orbits_complete) == 1
         ), f"There should be exactly one orbit for now, got {len(fitted_orbits_complete)}"
+        if fitted_orbits_complete["flag"][0] != 0:
+            # It probably failed, but we still got data out? So complain, but don't panic
+            logger.error(
+                f"Got non-zero flag {fitted_orbits_complete['flag'][0]} for {object_id}"
+            )
+        assert fitted_orbits_complete["FORMAT"][0] in [
+            "BCART",
+            "BCART_EQ",
+        ], f"Only support cartesian for now, got {fitted_orbits_complete['FORMAT'][0]}"
+        is_equatorial = fitted_orbits_complete["FORMAT"][0] == "BCART_EQ"
 
         # Layup doesn't mark outliers, so assume all input was used
         times = observations.coordinates.time.mjd()
@@ -123,11 +134,15 @@ class LayupOrbitFitter(OrbitFitter):
                 fitted_orbits_complete["epochMJD_TDB"], scale="tdb"
             ),
             origin=Origin.from_kwargs(code=["SUN"]),
-            frame="ecliptic",
+            frame="equatorial" if is_equatorial else "ecliptic",
             covariance=CoordinateCovariances.from_matrix(
                 np.reshape(covariances, (1, 6, 6))
             ),
         )
+        if is_equatorial:
+            cartesian_coordinates = cartesian_to_frame(
+                cartesian_coordinates, "ecliptic"
+            )
 
         orbit = FittedOrbits.from_kwargs(
             orbit_id=[object_id],

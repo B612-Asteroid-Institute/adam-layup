@@ -104,7 +104,6 @@ def test_success(real_data):
 
     assert fitted_orbit.arc_length[0].as_py() > 0
     assert fitted_orbit.num_obs[0].as_py() == len(observations)
-    # assert False
 
 
 def test_not_enough_data(real_data):
